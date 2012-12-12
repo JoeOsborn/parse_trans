@@ -91,11 +91,11 @@
 
 -define(DUMMY_LINE, 9999).
 
--define(ERROR(R, F, I),
+-define(ERROR(__Reason, __Fun, __Info),
         begin
-	    Trace = erlang:get_stacktrace(),
-            rpt_error(R, F, I, Trace),
-            throw({error,get_pos(I),{R, Trace}})
+	    __Trace = erlang:get_stacktrace(),
+            rpt_error(__Reason, __Fun, __Info, __Trace),
+            throw({error,get_pos(__Info),{__Reason, __Trace}})
         end).
 
 -export_type([forms/0]).
@@ -669,19 +669,19 @@ mapfoldl(F, Accu0, [Hd|Tail]) ->
 mapfoldl(F, Accu, []) when is_function(F, 2) -> {[], Accu}.
 
 
-rpt_error(_Reason, _Fun, _Info, _Trace) ->
-    %% Fmt = lists:flatten(
-    %% 	    ["*** ERROR in parse_transform function:~n"
-    %% 	     "*** Reason     = ~p~n",
-    %%          "*** Location: ~p~n",
-    %% 	     "*** Trace: ~p~n",
-    %% 	     ["*** ~10w = ~p~n" || _ <- Info]]),
-    %% Args = [Reason, Fun, Trace |
-    %% 	    lists:foldr(
-    %% 	      fun({K,V}, Acc) ->
-    %% 		      [K, V | Acc]
-    %% 	      end, [], Info)],
-    %%io:format(Fmt, Args),
+rpt_error(Reason, Fun, Info, Trace) ->
+    Fmt = lists:flatten(
+    	    ["*** ERROR in parse_transform function:~n"
+    	     "*** Reason     = ~p~n",
+             "*** Location: ~p~n",
+    	     "*** Trace: ~p~n",
+    	     ["*** ~10w = ~p~n" || _ <- Info]]),
+    Args = [Reason, Fun, Trace |
+    	    lists:foldr(
+    	      fun({K,V}, Acc) ->
+    		      [K, V | Acc]
+    	      end, [], Info)],
+    io:format(Fmt, Args),
     ok.
 
 -spec format_error({atom(), term()}) ->
